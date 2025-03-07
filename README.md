@@ -1,36 +1,112 @@
 # Go-Kafka Comment Service
 
-This project demonstrates how to implement a comment service using Go and Apache Kafka, featuring a REST API built with the Fiber web framework.
+A production-ready comment processing system built with Go and Apache Kafka, demonstrating real-time event streaming and microservices architecture.
 
-## What is Kafka?
+![Architecture Diagram](./docs/architecture.png)
 
-Apache Kafka is a distributed streaming platform that is used to build real-time data pipelines and streaming applications. It is designed to handle large volumes of data with high throughput and low latency. Kafka is used for various use cases such as messaging, website activity tracking, log aggregation, stream processing, and more.
+## 📚 Overview
 
-## Features of Kafka
+This project showcases:
+- Real-time comment processing using Kafka
+- RESTful API with Fiber framework
+- Event-driven architecture
+- Containerized development environment
+- Graceful shutdown handling
+- Production-ready error handling
 
-- **Scalability**: Kafka can scale horizontally by adding more brokers to the cluster.
-- **Durability**: Kafka persists messages on disk and replicates them across multiple brokers to ensure data durability.
-- **High Throughput**: Kafka can handle high throughput of messages with low latency.
-- **Fault Tolerance**: Kafka is designed to be fault-tolerant by replicating data across multiple brokers.
+## 🏗️ Architecture
 
-## Architecture Overview
+### System Components
 
-The project consists of two main components:
-1. **Producer Service**: A REST API that accepts comments and publishes them to Kafka
-2. **Consumer Service**: A service that reads comments from Kafka and processes them
-
-## Technical Stack
-
-- **Go**: Programming language (v1.22.6+)
-- **Fiber**: Web framework for REST API
-- **Apache Kafka**: Message broker for async processing
-- **Docker**: Containerization platform
-
-## API Endpoints
-
-### Comments API
-
+```mermaid
+graph LR
+    A[Client] --> B[REST API]
+    B --> C[Kafka Producer]
+    C --> D[Kafka Topic]
+    D --> E[Kafka Consumer]
+    E --> F[Processing Logic]
 ```
+
+### Data Flow
+1. Client submits comment via REST API
+2. Producer validates and publishes to Kafka
+3. Consumer processes messages asynchronously
+4. System maintains message ordering within partitions
+
+## 🚀 Features
+
+- **REST API**
+  - Input validation
+  - Error handling
+  - JSON responses
+  - API versioning
+
+- **Kafka Integration**
+  - Asynchronous processing
+  - Guaranteed message delivery
+  - At-least-once semantics
+  - Partition support
+
+- **Error Handling**
+  - Graceful shutdown
+  - Request validation
+  - Detailed error responses
+  - Comprehensive logging
+
+## 🛠️ Technical Stack
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| API Server | Fiber v2.52.1 | Fast HTTP server |
+| Message Broker | Kafka | Event streaming |
+| Client Library | Sarama v1.38.1 | Kafka integration |
+| Container | Docker | Development environment |
+
+## 📦 Installation
+
+### Prerequisites
+```bash
+# Check Go version
+go version  # Should be 1.22.6+
+
+# Check Docker version
+docker --version
+docker-compose --version
+```
+
+### Setup Steps
+
+1. **Clone Repository**
+```bash
+git clone https://github.com/yourusername/go-kafka.git
+cd go-kafka
+```
+
+2. **Start Kafka**
+```bash
+docker-compose up -d
+```
+
+3. **Install Dependencies**
+```bash
+go mod tidy
+```
+
+4. **Start Services**
+```bash
+# Terminal 1 - Producer
+cd producer
+go run producer.go
+
+# Terminal 2 - Consumer
+cd worker
+go run worker.go
+```
+
+## 📝 API Documentation
+
+### Create Comment
+```http
 POST /api/v1/comments
 Content-Type: application/json
 
@@ -39,7 +115,7 @@ Content-Type: application/json
 }
 ```
 
-**Response:**
+#### Success Response
 ```json
 {
     "success": true,
@@ -50,78 +126,72 @@ Content-Type: application/json
 }
 ```
 
-## Project Structure
+#### Error Responses
+```json
+// 400 Bad Request
+{
+    "success": false,
+    "message": "Invalid request body",
+    "error": "error details"
+}
 
-```
-/go-kafka
-│
-├── producer/
-│   ├── producer.go    # REST API implementation
-│   └── kafka.go       # Kafka producer implementation
-│
-├── consumer/
-│   └── main.go        # Kafka consumer implementation
-│
-├── docker-compose.yml # Docker compose for local development
-└── README.md
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Go 1.22.6 or higher
-- Kafka 2.8.0 or higher
-- Docker and Docker Compose
-
-### Local Development Setup
-
-1. Start Kafka using Docker Compose:
-```sh
-docker-compose up -d
+// 500 Internal Server Error
+{
+    "success": false,
+    "message": "Failed to queue comment"
+}
 ```
 
-2. Install dependencies:
-```sh
-go mod tidy
-```
+## 🔍 Testing
 
-3. Start the producer service:
-```sh
-cd producer
-go run *.go
-```
-
-4. Start the consumer service:
-```sh
-cd consumer
-go run main.go
-```
-
-### Testing the API
-
-You can test the API using curl:
-
-```sh
+```bash
+# Test API
 curl -X POST http://localhost:3000/api/v1/comments \
   -H "Content-Type: application/json" \
   -d '{"text":"Hello, World!"}'
+
+# Monitor Kafka Topics
+docker exec -it kafka kafka-topics.sh --bootstrap-server localhost:9092 --list
+docker exec -it kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic comments --from-beginning
 ```
 
-## Error Handling
+## 📊 Monitoring
 
-The API implements proper error handling:
-- 400 Bad Request: Invalid request body
-- 500 Internal Server Error: Server-side processing errors
+### Kafka Health Check
+```bash
+# List topics
+docker exec -it kafka kafka-topics.sh --bootstrap-server localhost:9092 --list
 
-## Contributing
+# Check consumer groups
+docker exec -it kafka kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+## 🔧 Configuration
 
-## License
+### Producer Settings
+- Max Retries: 5
+- Required Acks: WaitForAll
+- Success Tracking: Enabled
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Consumer Settings
+- Error Reporting: Enabled
+- Offset: Oldest
+- Partition: 0
+
+## 🤝 Contributing
+
+1. Fork repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Open pull request
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) for details
+
+## 📬 Contact
+
+- Author: Your Name
+- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/yourusername)
