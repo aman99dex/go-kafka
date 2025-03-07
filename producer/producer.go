@@ -34,7 +34,7 @@ func createProducer(brokersUrl []string) (sarama.SyncProducer, error) {
 }
 
 func PushCommentToQueue(topic string, message []byte) error {
-    brokersUrl := []string{"localhost:29092"}                // Kafka broker address
+    brokersUrl := []string{"localhost:9092"}                // Updated Kafka broker address
     
     producer, err := createProducer(brokersUrl)             // Initialize producer
     if err != nil {
