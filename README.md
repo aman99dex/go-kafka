@@ -1,6 +1,6 @@
-# Go-Kafka Project
+# Go-Kafka Comment Service
 
-This project demonstrates how to use Apache Kafka with the Go programming language.
+This project demonstrates how to implement a comment service using Go and Apache Kafka, featuring a REST API built with the Fiber web framework.
 
 ## What is Kafka?
 
@@ -13,17 +13,56 @@ Apache Kafka is a distributed streaming platform that is used to build real-time
 - **High Throughput**: Kafka can handle high throughput of messages with low latency.
 - **Fault Tolerance**: Kafka is designed to be fault-tolerant by replicating data across multiple brokers.
 
+## Architecture Overview
+
+The project consists of two main components:
+1. **Producer Service**: A REST API that accepts comments and publishes them to Kafka
+2. **Consumer Service**: A service that reads comments from Kafka and processes them
+
+## Technical Stack
+
+- **Go**: Programming language (v1.22.6+)
+- **Fiber**: Web framework for REST API
+- **Apache Kafka**: Message broker for async processing
+- **Docker**: Containerization platform
+
+## API Endpoints
+
+### Comments API
+
+```
+POST /api/v1/comments
+Content-Type: application/json
+
+{
+    "text": "Your comment text here"
+}
+```
+
+**Response:**
+```json
+{
+    "success": true,
+    "message": "Comment pushed successfully",
+    "comment": {
+        "text": "Your comment text here"
+    }
+}
+```
+
 ## Project Structure
 
 ```
 /go-kafka
 │
-├── producer
-│   └── main.go
+├── producer/
+│   ├── producer.go    # REST API implementation
+│   └── kafka.go       # Kafka producer implementation
 │
-├── consumer
-│   └── main.go
+├── consumer/
+│   └── main.go        # Kafka consumer implementation
 │
+├── docker-compose.yml # Docker compose for local development
 └── README.md
 ```
 
@@ -31,52 +70,58 @@ Apache Kafka is a distributed streaming platform that is used to build real-time
 
 ### Prerequisites
 
-- Go 1.16 or higher
+- Go 1.22.6 or higher
 - Kafka 2.8.0 or higher
-- Docker (optional, for running Kafka locally)
+- Docker and Docker Compose
 
-### Running Kafka Locally
+### Local Development Setup
 
-You can run Kafka locally using Docker. Here is a simple `docker-compose.yml` file to get you started:
-
-```yaml
-version: '2'
-services:
-    zookeeper:
-        image: wurstmeister/zookeeper:3.4.6
-        ports:
-            - "2181:2181"
-    kafka:
-        image: wurstmeister/kafka:2.12-2.2.1
-        ports:
-            - "9092:9092"
-        environment:
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-```
-
-Run the following command to start Kafka:
-
+1. Start Kafka using Docker Compose:
 ```sh
 docker-compose up -d
 ```
 
-### Running the Producer
-
-Navigate to the `producer` directory and run the following command:
-
+2. Install dependencies:
 ```sh
+go mod tidy
+```
+
+3. Start the producer service:
+```sh
+cd producer
+go run *.go
+```
+
+4. Start the consumer service:
+```sh
+cd consumer
 go run main.go
 ```
 
-### Running the Consumer
+### Testing the API
 
-Navigate to the `consumer` directory and run the following command:
+You can test the API using curl:
 
 ```sh
-go run main.go
+curl -X POST http://localhost:3000/api/v1/comments \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Hello, World!"}'
 ```
 
-## Future Work
+## Error Handling
 
-This README will be updated with more details as the project progresses. Stay tuned!
+The API implements proper error handling:
+- 400 Bad Request: Invalid request body
+- 500 Internal Server Error: Server-side processing errors
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
