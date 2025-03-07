@@ -186,12 +186,9 @@ docker exec -it kafka kafka-consumer-groups.sh --bootstrap-server localhost:9092
 4. Push to branch
 5. Open pull request
 
-## 📄 License
-
-MIT License - See [LICENSE](LICENSE) for details
 
 ## 📬 Contact
 
-- Author: Your Name
-- Email: your.email@example.com
-- GitHub: [@yourusername](https://github.com/yourusername)
+- Author: Aman Gupta
+- Email: kumarguptaaman896@gmail.com
+- GitHub: [@yourusername](https://github.com/aman99dex)
